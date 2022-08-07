@@ -20,8 +20,33 @@ class AddressViewModel extends GetxController{
     fetchAllAddress();
   }
 
-  onAddressSelected(String address){
-    isAddressSelected.value = address;
+  onAddressSelected(String uid) async{
+    isProgressIndicatorAddress.value = true;
+    var userEmail =  await SingeltonClass().getUserEmail();
+    if(userEmail != null){
+
+      await FirebaseFirestore.instance.collection("addresses").get()
+      .then((QuerySnapshot snapshot){
+        for(var u in snapshot.docs){
+          if(userEmail == u['email']){
+            FirebaseFirestore.instance.collection("addresses")
+                .doc(u['uid']).update({
+              'enabled':'false'
+            })
+            .then((value){
+              FirebaseFirestore.instance.collection("addresses")
+                  .doc(uid).update({
+                'enabled':'true'
+              })
+              .then((value){
+                isProgressIndicatorAddress.value = false;
+                isAddressSelected.value = uid;
+              });
+            });
+          }
+        }
+      });
+    }
   }
 
   fetchAllAddress() async{
@@ -29,7 +54,8 @@ class AddressViewModel extends GetxController{
     addressDummyList.clear();
     addressList.clear();
     isLoadingList.value = true;
-    await FirebaseFirestore.instance.collection("addresses").get()
+    await FirebaseFirestore.instance.collection("addresses")
+        .orderBy('addressCreated',descending: true).get()
     .then((QuerySnapshot snapshot){
       for(var u in snapshot.docs){
         if(userEmail == u['email']){
@@ -38,6 +64,7 @@ class AddressViewModel extends GetxController{
             email: u['email'],
             address: u['address'],
             addressCreated: u['addressCreated'],
+            enabled: u['enabled'],
           );
           addressDummyList.add(addressModel);
         }
@@ -58,7 +85,8 @@ class AddressViewModel extends GetxController{
         uid: uniqueId.toString(),
         email: userEmail,
         address: address,
-        addressCreated: DateTime.now().toString()
+        addressCreated: DateTime.now().toString(),
+        enabled: "false",
       );
       await FirebaseFirestore.instance.collection("addresses")
       .doc(uniqueId.toString())

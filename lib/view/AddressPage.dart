@@ -197,7 +197,7 @@ class _AddressPageState extends State<AddressPage> {
                                   child: Text("No addresses found!"),
                                 ):InkWell(
                                   onTap: (){
-                                    addressViewModel.onAddressSelected(addressViewModel.addressList[index].address!);
+                                    addressViewModel.onAddressSelected(addressViewModel.addressList[index].uid!.toString());
                                   },
                                   child: Card(
                                     child: Container(
@@ -209,7 +209,9 @@ class _AddressPageState extends State<AddressPage> {
                                               height:16,
                                               width: 16,
                                               decoration: BoxDecoration(
-                                                  color: addressViewModel.addressList[index].address! != addressViewModel.isAddressSelected.value?greyColor:greenColor,
+                                                  color: addressViewModel.addressList[index].uid! !=
+                                                      addressViewModel.isAddressSelected.value?
+                                                  greyColor:greenColor,
                                                   borderRadius: BorderRadius.circular(100)
                                               ),
                                             ),
